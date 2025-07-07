@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文件上传示例</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .upload-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .progress {
+            width: 100%;
+            height: 20px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+            display: none;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #007bff;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/cos-js-sdk-v5@1.10.1/dist/cos-js-sdk-v5.min.js"></script>
+</head>
+<body>
+    <div class="upload-container">
+        <h1>腾讯云 COS 文件上传示例</h1>
+        
+        <form id="uploadForm">
+            <div class="form-group">
+                <label for="fileInput">选择文件：</label>
+                <input type="file" id="fileInput" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="pathInput">子目录（可选）：</label>
+                <input type="text" id="pathInput" placeholder="例如：images 或 docs/pdf">
+                <small>留空将根据文件类型自动分类到对应目录下（如：/images、/video、/docs、/audio、/css 等）</small>
+            </div>
+            
+            <button type="submit" id="uploadBtn">上传文件</button>
+        </form>
+        
+        <div class="progress" id="progressContainer">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('uploadForm');
+        const fileInput = document.getElementById('fileInput');
+        const pathInput = document.getElementById('pathInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const result = document.getElementById('result');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const file = fileInput.files[0];
+            if (!file) {
+                showResult('请选择文件', 'error');
+                return;
+            }
+
+            try {
+                uploadBtn.disabled = true;
+                uploadBtn.textContent = '获取密钥中...';
+                progressContainer.style.display = 'block';
+                progressBar.style.width = '10%';
+
+                // 1. 获取临时密钥
+                const filename = file.name;
+                const path = pathInput.value.trim();
+                const params = new URLSearchParams({ filename });
+                if (path) {
+                    params.append('path', path);
+                }
+
+                const response = await fetch(`http://127.0.0.1:3000/getKeyAndCredentials?${params}`);
+                const data = await response.json();
+
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                progressBar.style.width = '30%';
+                uploadBtn.textContent = '上传中...';
+
+                // 2. 使用腾讯云 COS SDK 上传文件
+                const cos = new COS({
+                    getAuthorization: function (options, callback) {
+                        callback({
+                            TmpSecretId: data.credentials.tmpSecretId,
+                            TmpSecretKey: data.credentials.tmpSecretKey,
+                            SecurityToken: data.credentials.sessionToken,
+                            StartTime: data.startTime,
+                            ExpiredTime: data.expiredTime,
+                        });
+                    }
+                });
+
+                // 3. 上传文件
+                cos.uploadFile({
+                    Bucket: data.bucket,
+                    Region: data.region,
+                    Key: data.key,
+                    Body: file,
+                    onProgress: function(progressData) {
+                        const percent = Math.round(progressData.percent * 100);
+                        progressBar.style.width = (30 + percent * 0.7) + '%';
+                    }
+                }, function(err, uploadData) {
+                    uploadBtn.disabled = false;
+                    uploadBtn.textContent = '上传文件';
+                    progressContainer.style.display = 'none';
+                    progressBar.style.width = '0%';
+
+                    if (err) {
+                        showResult('上传失败: ' + err.message, 'error');
+                    } else {
+                        const fileUrl = `https://${uploadData.Location}`;
+                        showResult(`
+                            <strong>上传成功！</strong><br>
+                            文件路径: ${data.key}<br>
+                            访问地址: <a href="${fileUrl}" target="_blank">${fileUrl}</a>
+                        `, 'success');
+                        
+                        // 清空表单
+                        form.reset();
+                    }
+                });
+
+            } catch (error) {
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = '上传文件';
+                progressContainer.style.display = 'none';
+                progressBar.style.width = '0%';
+                showResult('错误: ' + error.message, 'error');
+            }
+        });
+
+        function showResult(message, type) {
+            result.innerHTML = message;
+            result.className = `result ${type}`;
+            result.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
