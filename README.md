@@ -90,25 +90,15 @@ curl "http://127.0.0.1:3000/getKeyAndCredentials?filename=photo.jpg&path=custom"
 在 `.env` 文件中修改 `RootPath` 参数：
 
 ```env
-# 个人博客
-RootPath=blog
-
-# 企业资源
-RootPath=assets
-
-# 开发环境
-RootPath=dev
-
-# 生产环境
-RootPath=prod
+RootPath=atrior
 ```
 
 ### 配置示例
 | RootPath | 图片路径 | 文档路径 |
 |----------|----------|----------|
-| `blog` | `blog/images/` | `blog/docs/` |
-| `assets` | `assets/images/` | `assets/docs/` |
-| `cdn` | `cdn/images/` | `cdn/docs/` |
+| `atrior` | `atrior/images/` | `atrior/docs/` |
+| `beacon` | `beacon/images/` | `beacon/docs/` |
+| `coolarec` | `coolarec/images/` | `coolarec/docs/` |
 
 ## 📁 项目结构
 
@@ -121,7 +111,6 @@ atrior-cdn/
 ├── README.md         # 项目说明
 ├── .env              # 环境配置
 ├── package.json      # 依赖配置
-└── upload.sh         # 上传脚本（获取密钥）
 ```
 
 ## 🔐 安全注意事项
