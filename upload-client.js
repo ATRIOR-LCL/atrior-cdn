@@ -55,10 +55,10 @@ async function uploadFile(filePath, subPath = '') {
             });
         });
 
-        const fileUrl = `https://${data.bucket}.cos.${data.region}.myqcloud.com/${data.key}`;
-        console.log('上传成功!');
-        console.log(`文件路径: ${data.key}`);
-        console.log(`访问地址: ${fileUrl}`);
+        const fileUrl = data.cdnUrl || `https://cdn.shaly.sdutacm.cn/${data.key}`;
+        console.log('✅ 上传成功!');
+        console.log(`📁 文件路径: ${data.key}`);
+        console.log(`🌐 CDN访问地址: ${fileUrl}`);
         
         return {
             success: true,

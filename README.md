@@ -25,11 +25,15 @@
 
 ### 1. 安装依赖
 ```bash
+# pnpm
 pnpm install
+
+# npm
+npm install
 ```
 
 ### 2. 配置环境变量
-复制 `.env` 文件并配置：
+在项目根目录下创建 `.env` 并复制下方文本到 `.env` 文件中，调整你自己的参数配置：
 ```env
 # 腾讯云密钥（必填）
 SecretId=你的SecretId
@@ -39,8 +43,11 @@ SecretKey=你的SecretKey
 Bucket=你的存储桶名称
 Region=存储桶地域
 
-# 根目录配置（可选，默认: atrior）
+# 专属目录配置（可选，默认: atrior）
 RootPath=atrior
+
+# CDN 访问域名配置（可选）
+CdnDomain=https://cdn.shaly.sdutacm.cn
 ```
 
 ### 3. 启动服务
@@ -52,7 +59,7 @@ node index.js
 
 ## 📋 使用方法
 
-### 命令行上传
+### 命令行上传（推荐）
 ```bash
 # 自动分类上传
 node upload-client.js photo.jpg
@@ -144,7 +151,8 @@ pnpm install
 node index.js
 
 # 测试上传
-node upload-client.js test.txt
+node upload-client.js <your-file-path>
+# demo: node upload-client.js demo.png
 ```
 
 ## 📄 许可证

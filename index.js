@@ -14,6 +14,8 @@ const config = {
   region: process.env.Region,
   // CDN 根目录配置，默认为 'atrior'
   rootPath: process.env.RootPath || 'atrior',
+  // CDN 访问域名配置
+  cdnDomain: process.env.CdnDomain || 'https://cdn.shaly.sdutacm.cn',
   // 密钥的上传操作权限列表
   allowActions: [
     // 简单上传
@@ -199,6 +201,8 @@ app.get('/getKeyAndCredentials', function (req, res, next) {
           bucket: config.bucket,
           region: config.region,
           key: cosKey,
+          // 添加 CDN 访问地址
+          cdnUrl: `${config.cdnDomain}/${cosKey}`,
         })
       );
     })

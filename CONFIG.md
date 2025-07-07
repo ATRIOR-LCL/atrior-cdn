@@ -22,6 +22,9 @@ Proxy=
 ```env
 # CDN 根目录配置（可自定义）
 RootPath=atrior
+
+# CDN 访问域名配置（可自定义）
+CdnDomain=https://cdn.shaly.sdutacm.cn
 ```
 
 ## 根目录配置说明
@@ -33,6 +36,15 @@ RootPath=atrior
   - `RootPath=cdn` → 文件上传到 `/cdn/images/`, `/cdn/video/` 等
   - `RootPath=assets` → 文件上传到 `/assets/images/`, `/assets/video/` 等
   - `RootPath=uploads` → 文件上传到 `/uploads/images/`, `/uploads/video/` 等
+
+### CdnDomain 参数
+- **默认值**: `https://cdn.shaly.sdutacm.cn`
+- **作用**: 设置文件访问的 CDN 域名
+- **格式**: 完整的域名 URL，包含 `https://`
+- **示例**:
+  - `CdnDomain=https://cdn.example.com`
+  - `CdnDomain=https://static.yoursite.com`
+  - `CdnDomain=https://assets.company.com`
 
 ### 文件分类目录
 系统会在根目录下自动创建以下子目录：
@@ -57,7 +69,7 @@ RootPath=atrior
 ### 1. 修改根目录
 编辑 `.env` 文件：
 ```env
-RootPath=mycdn
+RootPath=我的专属目录名称
 ```
 
 重启服务后，文件将上传到：
@@ -83,32 +95,6 @@ curl "http://127.0.0.1:3000/getKeyAndCredentials?filename=test.jpg"
 # 指定子目录
 curl "http://127.0.0.1:3000/getKeyAndCredentials?filename=test.jpg&path=custom/folder"
 ```
-
-## 常见配置场景
-
-### 个人博客
-```env
-RootPath=blog
-```
-文件结构: `blog/images/`, `blog/docs/`
-
-### 企业网站
-```env
-RootPath=assets
-```
-文件结构: `assets/images/`, `assets/video/`
-
-### 开发测试
-```env
-RootPath=dev
-```
-文件结构: `dev/images/`, `dev/docs/`
-
-### 生产环境
-```env
-RootPath=prod
-```
-文件结构: `prod/images/`, `prod/video/`
 
 ## 注意事项
 

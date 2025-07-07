@@ -15,13 +15,18 @@ fi
 echo "✅ 服务正常运行在 http://127.0.0.1:3000"
 echo ""
 
-# 读取当前配置的根目录
+# 读取当前配置的根目录和 CDN 域名
 ROOT_PATH=$(grep "^RootPath=" .env 2>/dev/null | cut -d'=' -f2)
+CDN_DOMAIN=$(grep "^CdnDomain=" .env 2>/dev/null | cut -d'=' -f2)
 if [ -z "$ROOT_PATH" ]; then
     ROOT_PATH="atrior"
 fi
+if [ -z "$CDN_DOMAIN" ]; then
+    CDN_DOMAIN="https://cdn.shaly.sdutacm.cn"
+fi
 
 echo "📁 当前根目录配置: $ROOT_PATH"
+echo "🌐 CDN访问域名: $CDN_DOMAIN"
 echo ""
 
 echo "📋 文件类型自动分类演示:"
